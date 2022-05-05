@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 const { ConfigModel } = require('./database/models/config');
 const discordBotSettings = require('./settings/discordBotSettings');
+const UserModel = require('./database/models/user');
 
 module.exports = {
     getMatchEmbed: async (match) => {
@@ -238,6 +239,31 @@ module.exports = {
         embed.setFooter({
             text: `${user.user.username}'s Profile`
         })
+
+        return embed;
+    },
+    getLeaderboardEmbed: async () => {
+        const embed= new MessageEmbed();
+
+        const guild = global.discordBot.guilds.cache.get(discordBotSettings.primaryGuildId);
+
+        const top20DbUsers = await UserModel.find({}).sort({elo: -1}).limit(20).exec();
+
+        let description = 'Leaderboard arranged by **Elo**\n\n';
+
+        for(let i = 0;i<top20DbUsers.length;i++){
+            let user = guild.members.cache.get(top20DbUsers[i].discordId);
+            if(!user){
+                user = await guild.members.fetch(top20DbUsers[i].discordId);
+            }
+            description += `${(i+1)}| ${user}: ${top20DbUsers[i].elo}\n`;
+        }
+        
+        embed.setDescription(description);
+        embed.setFooter({
+            text: `Top 20 at ${guild.name}`,
+            iconURL: guild.iconURL()
+        });
 
         return embed;
     }

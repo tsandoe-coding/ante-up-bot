@@ -44,5 +44,12 @@ module.exports = {
         await interaction.reply({embeds: [
             await EmbedService.getProfileEmbed(user, dbUser)
         ]})
+    },
+    seeLeaderboard: async (interaction) => {
+        await interaction.reply({
+            embeds: [
+                await EmbedService.getLeaderboardEmbed()
+            ]
+        })
     }
 }
